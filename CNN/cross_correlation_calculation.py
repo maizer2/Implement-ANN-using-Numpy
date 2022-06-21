@@ -1,3 +1,4 @@
+from audioop import add
 import numpy as np
 
 class Croos_Correlation_Calculator:
@@ -10,9 +11,21 @@ class Croos_Correlation_Calculator:
     self.P = Padding
     self.O = int(((self.I - self.K + (2 * self.P)) / self.S) + 1)
     self.new_feature_map = np.zeros((self.O, self.O))
-    self.valiation()
+    self.validation()
+    self.add_padding()
 
-  def valiation(self):
+  def add_padding(self):
+    added_feature_map = np.zeros(((self.I + (2 * self.P)), (self.I + (2 * self.P))))
+
+    # feature_map에 padding을 추가한다.
+    ## feature_map + padding*2 만큼 사이즈를 키운 added_feature_map에 feature_map을 P+1만큼 이동하여 feature_map을 덮어쓴다
+    for i in range(self.I):
+      for j in range(self.I):
+        added_feature_map[i+self.P][j+self.P] = feature_map[i][j]
+
+    self.feature_map = added_feature_map.copy()
+
+  def validation(self):
     # 정방행렬 확인
     if len(self.feature_map) != len(self.feature_map[0]):
       raise Exception("정방행렬이 아닙니다.")
@@ -35,14 +48,12 @@ class Croos_Correlation_Calculator:
 
           for m in range(j, j + self.K):
             kernel_sum += self.feature_map[n][m] * self.kernel[kernel_row][kernel_column]
-            print(f"{kernel_sum} += {self.feature_map[n][m]} * {self.kernel[kernel_row][kernel_column]}")
             kernel_column += 1
 
           kernel_row += 1
 
         self.new_feature_map[i][j] = kernel_sum
 
-  def get_new_feature_map(self):
     return self.new_feature_map
 
 if __name__== "__main__":
@@ -61,7 +72,7 @@ if __name__== "__main__":
                      [-1, 0, 1],
                      [-1, 0, 1]])
 
-  VALID = Croos_Correlation_Calculator(feature_map=feature_map, kernel=kernel)
-  VALID.Calculation()
-  new_feature_map = VALID.get_new_feature_map()
-  print(new_feature_map)
+  VALID = Croos_Correlation_Calculator(feature_map=feature_map, kernel=kernel, Padding=1)
+  VALID_feature_map = VALID.Calculation()
+  print(VALID_feature_map)
+
